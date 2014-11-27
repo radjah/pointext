@@ -5,7 +5,7 @@
 // @include     http*://*point.im*
 // @exclude     http*://point.im/statistics
 // @run-at	document-end
-// @version     0.0.6.4
+// @version     0.0.6.5
 // @updateURL   https://github.com/radjah/pointext/raw/master/Point_Extension.user.js
 // @grant       none
 
@@ -333,12 +333,37 @@ function parse_all_audios(){
     });
 }
 
+function parse_coub_links() {
+    $('.post-content a').each(function(num, obj) {
+        var href = obj.href;
+        var n = null;
+
+        if (n = href.match(new RegExp('^https?:\\/\\/coub\\.com\\/view\\/([0-9a-z]+)', 'i'))) {
+            var player = document.createElement('iframe');
+            var parent_width = $(obj.parentElement).width();
+            $(player).attr({
+                'src': 'https://coub.com/embed/' + n[1] + '?muted=false&autostart=false&originalSize=false&hideTopBar=false&startWithHD=true',
+                'allowfullscreen': 'true'
+            }).css({
+                'max-width': '640px',
+                'border': 'none',
+                'width': Math.floor(parent_width * 0.9),
+                'height': Math.ceil(parent_width * 0.9 * 480 / 640)
+            }).addClass('embeded_video').addClass('embeded_video_' + n[1]);
+
+            obj.parentElement.insertBefore(player, obj);
+        }
+    });
+}
+
+
 // А теперь дискотека
  booruupdateCSS();
  load_all_booru_images();
  mark_unread_post();
  parse_webm();
  parse_pleercom_links_nokita();
+ parse_coub_links();
  parse_all_audios();
  set_posts_count_label();
  
