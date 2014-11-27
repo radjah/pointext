@@ -6,11 +6,11 @@
 // @exclude     http*://point.im/statistics
 // @run-at	document-end
 // @version     0.0.6.4
-// @updateURL   https://gist.github.com/radjah/eb07a5732c7bed014235/raw/73f33fb3aa529308d1f3f2f4fc253c4abed95374/jquery.js
+// @updateURL   https://github.com/radjah/pointext/raw/master/Point_Extension.user.js
 // @grant       none
 
-// @require https://gist.github.com/radjah/eb07a5732c7bed014235/raw/4c7bee3835810bedaa39602fb915d6fc38a7e7d8/bquery_ajax.js
-// @require https://gist.github.com/radjah/eb07a5732c7bed014235/raw/73f33fb3aa529308d1f3f2f4fc253c4abed95374/jquery.js
+// @require     https://github.com/radjah/pointext/raw/master/jq/jquery.js
+// @require     https://github.com/radjah/pointext/raw/master/jq/bquery_ajax.js
 
 // ==/UserScript==
 
