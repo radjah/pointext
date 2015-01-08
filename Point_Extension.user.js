@@ -5,7 +5,7 @@
 // @include     http*://*point.im*
 // @exclude     http*://point.im/statistics
 // @run-at	document-end
-// @version     0.0.6.5
+// @version     0.0.7
 // @updateURL   https://github.com/radjah/pointext/raw/master/Point_Extension.user.js
 // @grant       none
 
@@ -27,8 +27,8 @@ function addGlobalStyle(css) {
 }
 
 function booruupdateCSS(){
- addGlobalStyle('.booru_pic{ display: block; }');
- addGlobalStyle('.booru_pic img{ border: none; max-width:  60%; max-height: 300px; }');
+ addGlobalStyle('.booru_pic, .instagram-post-embedded{ display: block; }');
+ addGlobalStyle('.booru_pic img, .instagram-post-embedded img{ border: none; max-width:  60%; max-height: 300px; }');
  addGlobalStyle('.post .post-id a .authors_unique_count, .post .post-id a .recomendation_count{ padding: 0 .5em; font-weight: normal; color: #35587c; background: #f2f2eb; }');
  addGlobalStyle('.post .post-id a .recomendation_count{ margin-left: 0.2em; background: #f2eceb; }');
 }
@@ -357,12 +357,50 @@ function parse_coub_links() {
 }
 
 
+function instagram_posts_embedding_init() {
+    var insagram_post_count = 0;
+    $('.post-content a').each(function(num, obj) {
+        if ($(obj).hasClass('booru_pic')) {
+            return;
+        }
+
+        var href = obj.href;
+        var n;
+
+        if (n = href.match(new RegExp('^https?://(www\\.)?instagram\\.com/p/([a-z0-9]+)/?', 'i'))) {
+            $ajax({
+                'url': 'https://api.instagram.com/oembed?url=' + urlencode('http://instagram.com/p/' + n[2] + '/'),
+                'success': function(text) {
+                    var answer = JSON.parse(text);
+                    var new_post = document.createElement('a');
+                    $(new_post).attr({
+                        'id': 'instagram-' + insagram_post_count,
+                        'href': answer.thumbnail_url,
+                        'title': answer.title,
+                        'target': '_blank'
+                    }).addClass('instagram-post-embedded').addClass('postimg');
+
+                    var image = document.createElement('img');
+                    image.alt = new_post.title;
+                    image.src = new_post.href;
+                    new_post.appendChild(image);
+
+                    obj.parentElement.insertBefore(new_post, obj);
+                    insagram_post_count++;
+                }
+            });
+
+        }
+    });
+}
+
 // А теперь дискотека
  booruupdateCSS();
  load_all_booru_images();
  mark_unread_post();
  parse_webm();
  parse_pleercom_links_nokita();
+ instagram_posts_embedding_init();
  parse_coub_links();
  parse_all_audios();
  set_posts_count_label();
