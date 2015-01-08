@@ -5,9 +5,9 @@
 // @include     http*://*point.im*
 // @exclude     http*://point.im/statistics
 // @run-at	document-end
-// @version     0.0.7
+// @version     0.0.7.1
 // @updateURL   https://github.com/radjah/pointext/raw/master/Point_Extension.user.js
-// @grant       none
+// @grant       GM_xmlhttpRequest
 
 // @require     https://github.com/radjah/pointext/raw/master/jq/jquery.js
 // @require     https://github.com/radjah/pointext/raw/master/jq/bquery_ajax.js
@@ -44,49 +44,49 @@ function load_all_booru_images(){
   var n   =null;
   
   if (n=href.match(new RegExp('^https?://danbooru\\.donmai\\.us/posts/([0-9]+)', 'i'))){
-   var image=create_image('danbooru', n[1]);
+   var image=create_image(href, 'danbooru', n[1]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?gelbooru\\.com\\/index\\.php\\?page\\=post&s\\=view&id=([0-9]+)', 'i'))){
-   var image=create_image('gelbooru', n[2]);
+   var image=create_image(href, 'gelbooru', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?safebooru\\.org\\/index\\.php\\?page\\=post&s\\=view&id=([0-9]+)', 'i'))){
-   var image=create_image('safebooru', n[2]);
+   var image=create_image(href, 'safebooru', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?([a-z0-9-]+\\.)?deviantart\\.com\\/art/[0-9a-z-]+?\\-([0-9]+)(\\?.+)?$', 'i'))){
-   var image=create_image('deviantart', n[3]);
+   var image=create_image(href, 'deviantart', n[3]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?e621\\.net\\/post\\/show\\/([0-9]+)\\/', 'i'))){
-   var image=create_image('e621', n[2]);
+   var image=create_image(href, 'e621', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://derpiboo\\.ru\\/([0-9]+)', 'i'))){
-   var image=create_image('derpibooru', n[1]);
+   var image=create_image(href, 'derpibooru', n[1]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://([0-9a-z-]+)\\.tumblr\\.com\\/post\\/([0-9]+)', 'i'))){
-   var image=create_image('tumblr', n[2], {'username':n[1]});
+   var image=create_image(href, 'tumblr', n[2], {'username':n[1]});
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
    /*
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?konachan\\.net\\/post\\/show\\/([0-9]+)\\/', 'i'))){
-   var image=create_image('konachannet', n[2]);
+   var image=create_image(href, 'konachannet', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^https?\\://(www\\.)?konachan\\.com\\/post\\/show\\/([0-9]+)\\/', 'i'))){
-   var image=create_image('konachancom', n[2]);
+   var image=create_image(href, 'konachancom', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
    */
   }else if (n=href.match(new RegExp('^https?://(www\\.)?pixiv\\.net\\/member_illust\\.php\\?mode\\=medium\\&illust_id\\=([0-9]+)', 'i'))){
-   var image=create_image('pixiv', n[2]);
+   var image=create_image(href, 'pixiv', n[2]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (n=href.match(new RegExp('^http\\:\\/\\/anime\\-pictures\\.net\\/pictures\\/view_post\\/([0-9]+)', 'i'))){
-   var image=create_image('animepicturesnet', n[1]);
+   var image=create_image(href, 'animepicturesnet', n[1]);
    obj.parentElement.insertBefore(image, obj);
    booru_picture_count++;
   }else if (false){
@@ -99,9 +99,10 @@ function load_all_booru_images(){
  
 }
 
-function create_image(domain, id, additional){
+function create_image(href, domain, id, additional){
  var a   =document.createElement('a');
- a.href  ='https://api.kanaria.ru/point/get_booru_picture.php?domain='+domain+'&id='+id;
+// a.href  ='https://api.kanaria.ru/point/get_booru_picture.php?domain='+domain+'&id='+id;
+ a.href  =href;
  if (typeof(additional)!='undefined'){
   for(var index in additional) {
    a.href+='&add_'+encodeURIComponent(index)+'='+encodeURIComponent(additional[index]);
@@ -114,7 +115,8 @@ function create_image(domain, id, additional){
  
  var image=document.createElement('img');
  image.alt=a.title;
- image.src=a.href;
+// image.src=a.href;
+ image.src='https://api.kanaria.ru/point/get_booru_picture.php?domain='+domain+'&id='+id;
  a.appendChild(image);
  
  return a;
@@ -368,10 +370,14 @@ function instagram_posts_embedding_init() {
         var n;
 
         if (n = href.match(new RegExp('^https?://(www\\.)?instagram\\.com/p/([a-z0-9]+)/?', 'i'))) {
-            $ajax({
-                'url': 'https://api.instagram.com/oembed?url=' + urlencode('http://instagram.com/p/' + n[2] + '/'),
-                'success': function(text) {
-                    var answer = JSON.parse(text);
+            xmlhttpRequest({
+                method: "GET",
+                url: 'https://api.instagram.com/oembed?url=' + urlencode('http://instagram.com/p/' + n[2] + '/'),
+		headers: {
+			'User-Agent': window.navigator.userAgent,
+			'Referer': window.location.href},
+                onload: function(response) {
+                    var answer = JSON.parse(response);
                     var new_post = document.createElement('a');
                     $(new_post).attr({
                         'id': 'instagram-' + insagram_post_count,
